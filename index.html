@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Contact Management System</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #f4f4f2;
+      --surface: #ffffff;
+      --surface-hover: #f9f9f8;
+      --border: rgba(0,0,0,0.1);
+      --border-strong: rgba(0,0,0,0.18);
+      --text-primary: #1a1a18;
+      --text-secondary: #5a5a56;
+      --text-muted: #9a9a94;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-bg: #eff6ff;
+      --accent-text: #1d4ed8;
+      --danger: #dc2626;
+      --danger-bg: #fef2f2;
+      --danger-text: #b91c1c;
+      --danger-border: rgba(220,38,38,0.25);
+      --success-bg: #f0fdf4;
+      --success-text: #15803d;
+      --success-border: rgba(21,128,61,0.3);
+      --radius: 8px;
+      --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.05);
+      --shadow-md: 0 4px 16px rgba(0,0,0,0.1), 0 1px 4px rgba(0,0,0,0.06);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08);
+    }
+
+    [data-theme="dark"] {
+      --bg: #111110;
+      --surface: #1c1c1a;
+      --surface-hover: #242422;
+      --border: rgba(255,255,255,0.1);
+      --border-strong: rgba(255,255,255,0.18);
+      --text-primary: #f0f0ec;
+      --text-secondary: #a0a09a;
+      --text-muted: #606059;
+      --accent: #3b82f6;
+      --accent-hover: #60a5fa;
+      --accent-bg: #1e2d4a;
+      --accent-text: #93c5fd;
+      --danger: #ef4444;
+      --danger-bg: #2d1515;
+      --danger-text: #fca5a5;
+      --danger-border: rgba(239,68,68,0.3);
+      --success-bg: #14291e;
+      --success-text: #86efac;
+      --success-border: rgba(134,239,172,0.3);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      transition: background 0.2s, color 0.2s;
+    }
+
+    /* ── Top Bar ── */
+    .topbar {
+      background: var(--surface);
+      border-bottom: 0.5px solid var(--border);
+      padding: 0 1.5rem;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 10px; }
+    .topbar-left i { font-size: 22px; color: var(--accent); }
+    .topbar-left h1 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+    .topbar-right { display: flex; align-items: center; gap: 10px; }
+
+    /* ── Buttons ── */
+    .btn {
+      padding: 8px 14px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border-strong);
+      background: transparent;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s, transform 0.1s;
+      font-family: inherit;
+    }
+    .btn:hover { background: var(--surface-hover); }
+    .btn:active { transform: scale(0.97); }
+    .btn.primary { background: var(--accent); color: #fff; border-color: transparent; }
+    .btn.primary:hover { background: var(--accent-hover); }
+    .btn.danger { color: var(--danger-text); border-color: var(--danger-border); }
+    .btn.danger:hover { background: var(--danger-bg); }
+    .btn.icon-btn { padding: 7px; border-radius: var(--radius); }
+    .btn.sm { padding: 5px 10px; font-size: 12px; }
+
+    /* ── Layout ── */
+    .container { max-width: 800px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+    /* ── Stats Row ── */
+    .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 1.5rem; }
+    .stat-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+    }
+    .stat-label { font-size: 12px; color: var(--text-muted); margin-bottom: 4px; }
+    .stat-value { font-size: 24px; font-weight: 600; color: var(--text-primary); }
+
+    /* ── Search + Add Row ── */
+    .toolbar { display: flex; gap: 10px; margin-bottom: 1.25rem; }
+    .search-wrap { flex: 1; position: relative; }
+    .search-wrap i { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; pointer-events: none; }
+    .search-wrap input {
+      width: 100%;
+      padding: 9px 12px 9px 36px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      background: var(--surface);
+      color: var(--text-primary);
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+    }
+    .search-wrap input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+    .search-wrap input::placeholder { color: var(--text-muted); }
+
+    /* ── Contact Cards ── */
+    .contact-list { display: flex; flex-direction: column; gap: 8px; }
+    .contact-card {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      animation: slideIn 0.2s ease;
+    }
+    @keyframes slideIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
+    .contact-card:hover { border-color: var(--border-strong); box-shadow: var(--shadow); }
+
+    .avatar {
+      width: 44px; height: 44px;
+      border-radius: 50%;
+      background: var(--accent-bg);
+      color: var(--accent-text);
+      font-size: 14px; font-weight: 600;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .contact-info { flex: 1; min-width: 0; }
+    .contact-name { font-weight: 600; font-size: 15px; color: var(--text-primary); margin-bottom: 3px; }
+    .contact-meta { display: flex; gap: 14px; flex-wrap: wrap; }
+    .contact-meta span { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; }
+    .contact-meta i { font-size: 13px; }
+    .card-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+    /* ── Empty State ── */
+    .empty {
+      text-align: center; padding: 4rem 1rem;
+      color: var(--text-muted);
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 12px;
+    }
+    .empty i { font-size: 40px; display: block; margin-bottom: 10px; opacity: 0.4; }
+    .empty p { font-size: 14px; margin-bottom: 1rem; }
+
+    /* ── Modal ── */
+    .modal-overlay {
+      display: none; position: fixed;
+      inset: 0; background: rgba(0,0,0,0.4);
+      z-index: 100; align-items: center; justify-content: center;
+      padding: 1rem;
+      animation: fadeIn 0.15s ease;
+    }
+    @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 16px;
+      padding: 1.5rem;
+      width: 100%; max-width: 460px;
+      box-shadow: var(--shadow-lg);
+      animation: popIn 0.2s ease;
+    }
+    @keyframes popIn { from { opacity:0; transform:scale(0.95) translateY(8px); } to { opacity:1; transform:scale(1) translateY(0); } }
+    .modal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; }
+    .modal-header h2 { font-size: 17px; font-weight: 600; color: var(--text-primary); }
+    .field { margin-bottom: 1rem; }
+    .field label { display: block; font-size: 13px; font-weight: 500; color: var(--text-secondary); margin-bottom: 5px; }
+    .field input {
+      width: 100%; padding: 9px 12px;
+      border-radius: var(--radius);
+      border: 0.5px solid var(--border);
+      background: var(--bg);
+      color: var(--text-primary);
+      font-size: 14px; outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      font-family: inherit;
+    }
+    .field input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-bg); }
+    .field input.error { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-bg); }
+    .field-error { font-size: 12px; color: var(--danger-text); margin-top: 4px; display: none; }
+    .field-error.show { display: block; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid var(--border); }
+
+    /* ── Confirm Dialog ── */
+    .confirm-overlay {
+      display: none; position: fixed;
+      inset: 0; background: rgba(0,0,0,0.5);
+      z-index: 200; align-items: center; justify-content: center;
+      padding: 1rem;
+    }
+    .confirm-overlay.open { display: flex; }
+    .confirm-box {
+      background: var(--surface);
+      border: 0.5px solid var(--border);
+      border-radius: 14px;
+      padding: 1.5rem;
+      max-width: 360px; width: 100%;
+      box-shadow: var(--shadow-lg);
+    }
+    .confirm-box .ci { font-size: 32px; color: var(--danger); margin-bottom: 10px; }
+    .confirm-box h3 { font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: 6px; }
+    .confirm-box p { font-size: 14px; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.5; }
+    .confirm-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── Toast ── */
+    .toast {
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      background: var(--surface);
+      border: 0.5px solid var(--success-border);
+      border-radius: var(--radius);
+      padding: 10px 16px;
+      font-size: 13px; font-weight: 500;
+      color: var(--success-text);
+      display: flex; align-items: center; gap: 8px;
+      box-shadow: var(--shadow-md);
+      opacity: 0; transform: translateY(8px);
+      transition: opacity 0.2s, transform 0.2s;
+      pointer-events: none; z-index: 300;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.error-toast { border-color: var(--danger-border); color: var(--danger-text); }
+
+    /* ── Theme Toggle ── */
+    .theme-btn { font-size: 18px; }
+
+    /* ── Responsive ── */
+    @media (max-width: 520px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .contact-meta { flex-direction: column; gap: 4px; }
+      .topbar-left h1 { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Bar -->
+  <header class="topbar">
+    <div class="topbar-left">
+      <i class="ti ti-address-book"></i>
+      <h1>Contacts</h1>
+    </div>
+    <div class="topbar-right">
+      <button class="btn icon-btn theme-btn" onclick="toggleTheme()" aria-label="Toggle dark mode" title="Toggle theme">
+        <i class="ti ti-moon" id="theme-icon"></i>
+      </button>
+      <button class="btn primary" onclick="openModal()">
+        <i class="ti ti-plus"></i> Add contact
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="container">
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat-card">
+        <div class="stat-label">Total contacts</div>
+        <div class="stat-value" id="stat-total">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">With email</div>
+        <div class="stat-value" id="stat-email">0</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">With phone</div>
+        <div class="stat-value" id="stat-phone">0</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <div class="search-wrap">
+        <i class="ti ti-search"></i>
+        <input type="text" id="search" placeholder="Search by name, phone, or email…" oninput="renderContacts()" aria-label="Search contacts">
+      </div>
+    </div>
+
+    <!-- Contact List -->
+    <div id="contact-list" class="contact-list" aria-live="polite"></div>
+  </main>
+
+  <!-- Add / Edit Modal -->
+  <div class="modal-overlay" id="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="modal-title">New contact</h2>
+        <button class="btn icon-btn" onclick="closeModal()" aria-label="Close"><i class="ti ti-x"></i></button>
+      </div>
+      <div class="field">
+        <label for="f-name">Full name <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="f-name" placeholder="e.g. Priya Sharma" autocomplete="name">
+        <div class="field-error" id="err-name">Please enter a name.</div>
+      </div>
+      <div class="field">
+        <label for="f-phone">Phone number</label>
+        <input type="tel" id="f-phone" placeholder="+91 98765 43210" autocomplete="tel">
+      </div>
+      <div class="field">
+        <label for="f-email">Email address</label>
+        <input type="email" id="f-email" placeholder="name@example.com" autocomplete="email">
+        <div class="field-error" id="err-email">Please enter a valid email.</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn" onclick="closeModal()">Cancel</button>
+        <button class="btn primary" onclick="saveContact()" id="save-btn">Save contact</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Delete Confirm -->
+  <div class="confirm-overlay" id="confirm-overlay">
+    <div class="confirm-box">
+      <div class="ci"><i class="ti ti-alert-triangle"></i></div>
+      <h3>Delete contact?</h3>
+      <p id="confirm-msg">This action can't be undone.</p>
+      <div class="confirm-actions">
+        <button class="btn" onclick="closeConfirm()">Cancel</button>
+        <button class="btn danger" onclick="confirmDelete()"><i class="ti ti-trash"></i> Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="alert" aria-live="polite">
+    <i class="ti ti-circle-check" id="toast-icon"></i>
+    <span id="toast-msg"></span>
+  </div>
+
+<script>
+  // ── State ──
+  let contacts = JSON.parse(localStorage.getItem('cms_contacts') || 'null') || [
+    { id: 1, name: 'Priya Sharma',  phone: '+91 98765 43210', email: 'priya.sharma@gmail.com' },
+    { id: 2, name: 'Rahul Verma',   phone: '+91 91234 56789', email: 'rahul.v@outlook.com' },
+    { id: 3, name: 'Anita Das',     phone: '+91 87654 32109', email: 'anita.das@company.in' },
+  ];
+  let nextId = Math.max(0, ...contacts.map(c => c.id)) + 1;
+  let editingId = null;
+  let deletingId = null;
+  let toastTimer = null;
+
+  // ── Persist ──
+  function persist() { localStorage.setItem('cms_contacts', JSON.stringify(contacts)); }
+
+  // ── Helpers ──
+  function initials(name) {
+    return name.trim().split(/\s+/).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+  }
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+  function isValidEmail(e) { return !e || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e); }
+
+  // ── Render ──
+  function renderContacts() {
+    const q = document.getElementById('search').value.toLowerCase();
+    const list = document.getElementById('contact-list');
+
+    const filtered = contacts.filter(c =>
+      c.name.toLowerCase().includes(q) ||
+      c.phone.toLowerCase().includes(q) ||
+      c.email.toLowerCase().includes(q)
+    );
+
+    document.getElementById('stat-total').textContent = contacts.length;
+    document.getElementById('stat-email').textContent = contacts.filter(c => c.email).length;
+    document.getElementById('stat-phone').textContent = contacts.filter(c => c.phone).length;
+
+    if (!filtered.length) {
+      list.innerHTML = `
+        <div class="empty">
+          <i class="ti ti-users"></i>
+          <p>${q ? 'No contacts match your search.' : 'No contacts yet. Add your first one!'}</p>
+          ${!q ? `<button class="btn primary" onclick="openModal()"><i class="ti ti-plus"></i> Add contact</button>` : ''}
+        </div>`;
+      return;
+    }
+
+    list.innerHTML = filtered.map(c => `
+      <div class="contact-card" id="card-${c.id}">
+        <div class="avatar">${escHtml(initials(c.name))}</div>
+        <div class="contact-info">
+          <div class="contact-name">${escHtml(c.name)}</div>
+          <div class="contact-meta">
+            ${c.phone ? `<span><i class="ti ti-phone"></i>${escHtml(c.phone)}</span>` : ''}
+            ${c.email ? `<span><i class="ti ti-mail"></i>${escHtml(c.email)}</span>` : ''}
+            ${!c.phone && !c.email ? `<span style="color:var(--text-muted);font-style:italic">No contact details</span>` : ''}
+          </div>
+        </div>
+        <div class="card-actions">
+          <button class="btn sm" onclick="openModal(${c.id})" aria-label="Edit ${escHtml(c.name)}">
+            <i class="ti ti-edit"></i> Edit
+          </button>
+          <button class="btn sm danger" onclick="askDelete(${c.id})" aria-label="Delete ${escHtml(c.name)}">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  // ── Modal ──
+  function openModal(id = null) {
+    editingId = id;
+    clearErrors();
+
+    if (id) {
+      const c = contacts.find(x => x.id === id);
+      document.getElementById('f-name').value  = c.name;
+      document.getElementById('f-phone').value = c.phone;
+      document.getElementById('f-email').value = c.email;
+      document.getElementById('modal-title').textContent = 'Edit contact';
+      document.getElementById('save-btn').textContent = 'Save changes';
+    } else {
+      document.getElementById('f-name').value  = '';
+      document.getElementById('f-phone').value = '';
+      document.getElementById('f-email').value = '';
+      document.getElementById('modal-title').textContent = 'New contact';
+      document.getElementById('save-btn').textContent = 'Save contact';
+    }
+
+    document.getElementById('modal-overlay').classList.add('open');
+    setTimeout(() => document.getElementById('f-name').focus(), 60);
+  }
+
+  function closeModal() {
+    document.getElementById('modal-overlay').classList.remove('open');
+    clearErrors();
+    editingId = null;
+  }
+
+  function clearErrors() {
+    ['f-name','f-email'].forEach(id => document.getElementById(id).classList.remove('error'));
+    ['err-name','err-email'].forEach(id => document.getElementById(id).classList.remove('show'));
+  }
+
+  function saveContact() {
+    const name  = document.getElementById('f-name').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    let valid = true;
+
+    clearErrors();
+
+    if (!name) {
+      document.getElementById('f-name').classList.add('error');
+      document.getElementById('err-name').classList.add('show');
+      document.getElementById('f-name').focus();
+      valid = false;
+    }
+    if (!isValidEmail(email)) {
+      document.getElementById('f-email').classList.add('error');
+      document.getElementById('err-email').classList.add('show');
+      if (valid) document.getElementById('f-email').focus();
+      valid = false;
+    }
+    if (!valid) return;
+
+    if (editingId) {
+      const c = contacts.find(x => x.id === editingId);
+      c.name = name; c.phone = phone; c.email = email;
+      showToast('Contact updated');
+    } else {
+      contacts.push({ id: nextId++, name, phone, email });
+      showToast('Contact added');
+    }
+
+    persist();
+    closeModal();
+    renderContacts();
+  }
+
+  // ── Delete ──
+  function askDelete(id) {
+    deletingId = id;
+    const c = contacts.find(x => x.id === id);
+    document.getElementById('confirm-msg').textContent = `"${c.name}" will be permanently removed.`;
+    document.getElementById('confirm-overlay').classList.add('open');
+  }
+
+  function closeConfirm() {
+    document.getElementById('confirm-overlay').classList.remove('open');
+    deletingId = null;
+  }
+
+  function confirmDelete() {
+    contacts = contacts.filter(x => x.id !== deletingId);
+    persist();
+    closeConfirm();
+    showToast('Contact deleted');
+    renderContacts();
+  }
+
+  // ── Toast ──
+  function showToast(msg, isError = false) {
+    const t = document.getElementById('toast');
+    const icon = document.getElementById('toast-icon');
+    document.getElementById('toast-msg').textContent = msg;
+    t.className = 'toast' + (isError ? ' error-toast' : '');
+    icon.className = isError ? 'ti ti-alert-circle' : 'ti ti-circle-check';
+    t.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  // ── Theme ──
+  function toggleTheme() {
+    const isDark = document.body.getAttribute('data-theme') === 'dark';
+    document.body.setAttribute('data-theme', isDark ? '' : 'dark');
+    document.getElementById('theme-icon').className = isDark ? 'ti ti-moon' : 'ti ti-sun';
+    localStorage.setItem('cms_theme', isDark ? 'light' : 'dark');
+  }
+
+  (function initTheme() {
+    const saved = localStorage.getItem('cms_theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (saved === 'dark' || (!saved && prefersDark)) {
+      document.body.setAttribute('data-theme', 'dark');
+      document.getElementById('theme-icon').className = 'ti ti-sun';
+    }
+  })();
+
+  // ── Keyboard / Click Outside ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') { closeModal(); closeConfirm(); }
+    if (e.key === 'Enter' && document.getElementById('modal-overlay').classList.contains('open')) {
+      saveContact();
+    }
+  });
+
+  document.getElementById('modal-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeModal();
+  });
+
+  document.getElementById('confirm-overlay').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+  });
+
+  // ── Init ──
+  renderContacts();
+</script>
+</body>
+</html>
